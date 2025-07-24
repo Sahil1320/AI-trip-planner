@@ -140,7 +140,7 @@ function CreateTrip() {
     } finally {
       setLoading(false);
     }
-    navigate('/view-trip/'+docId)
+
   }, [loading, formData]);
 
   const SaveAiTrip = async (TripDataRaw) => {

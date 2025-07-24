@@ -34,12 +34,12 @@ function HotelCardItem({ hotel }) {
     >
       
       <img
-        src={photoUrl || '/placeholder.png'}
+        src={photoUrl || '/placeholder.jpg'}
         alt="hotel"
         className="rounded-xl w-full h-[180px] object-cover"
       />
       <div className="my-2 flex flex-col gap-2">
-        <h2 className="font-medium">{hotel?.hotelName}</h2>
+        <h2 className="font-medium text-sm md:text-base">{hotel?.hotelName}</h2>
         <h2 className="text-xs text-gray-500">📍{hotel?.hotelAddress}</h2>
         <h2 className="text-sm">💰{hotel?.price}</h2>
         <h2 className="text-sm">⭐{hotel?.rating}</h2>
