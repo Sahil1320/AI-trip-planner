@@ -52,28 +52,18 @@ export const SelectBudgetOptions = [
 ];
 
 export const AI_PROMPT = `
-Generate a travel plan for Location: {location}, for {totalDays} days for {traveler} with a {budget} budget.
-Return ONLY valid JSON in this format:
+You are a helpful travel assistant.
+
+Generate a detailed travel plan for:
+Location: {location}
+Duration: {totalDays} days
+Traveler Type: {traveler}
+Budget: {budget}
+
+You must return ONLY valid JSON in the following format:
+
 {
   "hotelOptions": [
-    {
-      "hotelName": "string",
-      "hotelAddress": "string",
-      "price": "string",
-      "hotelImageUrl": "string",
-      "geoCoordinates": { "latitude": number, "longitude": number },
-      "rating": number,
-      "description": "string"
-    },
-    {
-      "hotelName": "string",
-      "hotelAddress": "string",
-      "price": "string",
-      "hotelImageUrl": "string",
-      "geoCoordinates": { "latitude": number, "longitude": number },
-      "rating": number,
-      "description": "string"
-    },
     {
       "hotelName": "string",
       "hotelAddress": "string",
@@ -102,5 +92,11 @@ Return ONLY valid JSON in this format:
     }
   ]
 }
-Generate at least 3 to 5 unique hotels in the hotelOptions array.
+
+Important Instructions:
+- Include at least 3 to 5 hotels in the hotelOptions array — all unique.
+- The itinerary must include at least one place for each day.
+- All fields are mandatory — do not leave any field empty or null.
+- Ensure your response is 100% valid JSON — no markdown, no explanation, no headings.
 `;
+

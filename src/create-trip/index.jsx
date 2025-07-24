@@ -144,24 +144,39 @@ function CreateTrip() {
   }, [loading, formData]);
 
   const SaveAiTrip = async (TripDataRaw) => {
-    const parsed = safeParseAIJSON(TripDataRaw);
-    const user = JSON.parse(localStorage.getItem("user") || "{}");
-    const docId = Date.now().toString();
-    try {
-      await setDoc(doc(db, "AITrips", docId), {
-        userSelection: formData,
-        tripData: parsed.ok ? parsed.data : null,
-        rawAiText: parsed.ok ? null : (parsed.raw ?? TripDataRaw),
-        userEmail: user?.email ?? null,
-        id: docId,
-        createdAt: new Date().toISOString(),
-      });
-      console.log("Trip saved:", docId);
-      navigate('/view-trip/'+docId)
-    } catch (err) {
-      console.error("Firestore save failed:", err);
-    }
-  };
+  const parsed = safeParseAIJSON(TripDataRaw);
+
+  // ✅ Validation check: If missing hotel or itinerary, show error and stop
+  if (
+    !parsed.ok ||
+    !parsed.data ||
+    !parsed.data.itinerary?.length ||
+    !parsed.data.hotelOptions?.length
+  ) {
+    console.error("Invalid Itinerary or Hotel Options", parsed.data);
+    toast.error("Incomplete trip generated. Please try again.");
+    return;
+  }
+
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const docId = Date.now().toString();
+
+  try {
+    await setDoc(doc(db, "AITrips", docId), {
+      userSelection: formData,
+      tripData: parsed.data,
+      rawAiText: null,
+      userEmail: user?.email ?? null,
+      id: docId,
+      createdAt: new Date().toISOString(),
+    });
+    console.log("Trip saved:", docId);
+    navigate('/view-trip/' + docId);
+  } catch (err) {
+    console.error("Firestore save failed:", err);
+  }
+};
+
 
   const isFormIncomplete = (() => {
     const { location, noOfDays, budget, traveler } = formData;

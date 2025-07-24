@@ -36,7 +36,7 @@ function PlaceCardItem({ place }) {
     >
       <div className="border rounded-xl p-3 mt-2 flex gap-5 hover:scale-105 transition-all hover:shadow-md cursor-pointer">
         <img
-          src={photoUrl || '/placeholder.png'}
+          src={photoUrl || '/placeholder.jpg'}
           className="w-[130px] h-[130px] rounded-xl p-3 object-cover"
         />
 
