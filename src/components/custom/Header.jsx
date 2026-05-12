@@ -15,6 +15,7 @@ import {
   DialogContent,
   DialogDescription,
   DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { googleLogout, useGoogleLogin } from "@react-oauth/google";
 
@@ -46,6 +47,9 @@ function Header() {
         localStorage.setItem("user", JSON.stringify(resp.data));
         setOpenDialog(false);
         window.location.reload();
+      })
+      .catch((error) => {
+        console.error("Error fetching user profile:", error);
       });
   };
   return (
@@ -77,7 +81,7 @@ function Header() {
               </PopoverTrigger>
               <PopoverContent>
                 <h2
-                  classname="cursor-pointer"
+                  className="cursor-pointer"
                   onClick={() => {
                     googleLogout();
                     localStorage.clear();
@@ -96,17 +100,23 @@ function Header() {
       <Dialog open={openDialog} onOpenChange={setOpenDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogDescription>
-              <img src="/logo.svg" alt="logo" />
-              <h2 className="font-bold text-lg mt-7">Sign In with Google</h2>
-              <p>Sign in to the App with Google authentication securely</p>
-              <Button
-                onClick={login}
-                className="w-full mt-5 flex gap-4 items-center"
-              >
-                <FcGoogle className="h-7 w-7" />
-                Sign In with Google
-              </Button>
+            <DialogTitle asChild>
+              <div>
+                <img src="/logo.svg" alt="logo" />
+                <h2 className="font-bold text-lg mt-7">Sign In with Google</h2>
+              </div>
+            </DialogTitle>
+            <DialogDescription asChild>
+              <div>
+                <span className="block mb-4 text-sm text-gray-500">Sign in to the App with Google authentication securely</span>
+                <Button
+                  onClick={login}
+                  className="w-full mt-5 flex gap-4 items-center"
+                >
+                  <FcGoogle className="h-7 w-7" />
+                  Sign In with Google
+                </Button>
+              </div>
             </DialogDescription>
           </DialogHeader>
         </DialogContent>

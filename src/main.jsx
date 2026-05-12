@@ -2,8 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
-import { RouterProvider } from 'react-router'
-import { createBrowserRouter } from 'react-router'
+import { RouterProvider, createBrowserRouter } from 'react-router-dom'
 import CreateTrip from './create-trip'
 import Header from './components/custom/Header.jsx'
 import { Toaster } from './components/ui/sonner'
@@ -26,7 +25,7 @@ const router=createBrowserRouter([
     element:<Viewtrip />
   },
   {
-    path:'my-trips',
+    path:'/my-trips',
     element:<MyTrips />
   }
 ])
