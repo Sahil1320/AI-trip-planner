@@ -7,23 +7,19 @@ function PlacesToVisit({trip}) {
       <h2 className='font-bold text-lg p-5'>Places to Visit</h2>
 
       <div>
-        {trip.tripData?.itinerary.map((item,index)=>(
-            
-            <div className='mt-5'>
+        {trip?.tripData?.itinerary?.map((item, itemIndex) => (
+            <div key={itemIndex} className='mt-5'>
                 <h2 className='font-medium text-lg p-5'>Day {item.day}</h2>
                 <div className='grid md:grid-cols-2 gap-5 p-8'>
                 
-                {item?.places?.map((place,index)=>(
-                    <div key={index}>
+                {item?.places?.map((place, placeIndex) => (
+                    <div key={placeIndex}>
                         <h2 className='font-medium text-sm text-orange-300'>{place.bestTimeToVisit}</h2>
-                        <PlaceCardItem  place={place}/>
+                        <PlaceCardItem place={place} />
                     </div>
-                       
-                   
                 ))}
                  </div>
             </div>
-
         ))}
       </div>
     </div>

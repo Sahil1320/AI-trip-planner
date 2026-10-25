@@ -31,7 +31,13 @@ function UserTripCardItem({trip}) {
     <Link to={'/view-trip/'+trip?.id}>
 
     <div className='hover:scale-105 transition-all '>
-      <img src={photoUrl?photoUrl: '/placeholder.jpg'}  className="object-cover rounded-xl h-[220px]" />
+      <img
+        src={photoUrl ? photoUrl : '/placeholder.jpg'}
+        onError={(e) => {
+          e.currentTarget.src = '/placeholder.jpg';
+        }}
+        className="object-cover rounded-xl h-[220px] w-full"
+      />
       <div>
         <h2 className='font-bold text-lg'>{trip?.userSelection?.location?.label}</h2>
         <h2 className='text-sm text-gray-500'>{trip?.userSelection.noOfDays} Days trip with {trip?.userSelection?.budget} Budget</h2>

@@ -58,6 +58,8 @@ function safeParseAIJSON(raw) {
 
 function CreateTrip() {
   const [place, setPlace] = useState(null);
+  const [manualMode, setManualMode] = useState(false);
+  const [manualLocation, setManualLocation] = useState("");
   const [formData, setFormData] = useState({
     location: null,
     noOfDays: "",
@@ -136,8 +138,11 @@ function CreateTrip() {
           ? await result.response.text()
           : result?.response?.text ?? "";
       console.log("-- RAW AI RESPONSE --\n", rawText);
-      await SaveAiTrip(rawText);
-      toast("Trip generated!");
+      const savedDocId = await SaveAiTrip(rawText);
+      if (savedDocId) {
+        toast("Trip generated!");
+        navigate('/view-trip/' + savedDocId);
+      }
     } catch (err) {
       console.error("AI generation error:", err);
       toast("Failed to generate trip.");
@@ -151,16 +156,29 @@ function CreateTrip() {
   const parsed = safeParseAIJSON(TripDataRaw);
 
   // ✅ Validation check: If missing hotel or itinerary, show error and stop
+  // Check multiple possible key names the AI might return
+  const tripData = parsed.data;
+  const itinerary = tripData?.itinerary || tripData?.dailyPlan || tripData?.daily_plan || tripData?.dailyItinerary;
+  const hotels = tripData?.hotelOptions || tripData?.hotels || tripData?.hotel_options || tripData?.hotelRecommendations;
+
   if (
     !parsed.ok ||
-    !parsed.data ||
-    !parsed.data.itinerary?.length ||
-    !parsed.data.hotelOptions?.length
+    !tripData ||
+    !itinerary?.length ||
+    !hotels?.length
   ) {
-    console.error("Invalid Itinerary or Hotel Options", parsed.data);
+    console.error("Invalid Itinerary or Hotel Options", tripData);
+    console.error("Available keys:", tripData ? Object.keys(tripData) : "no data");
     toast.error("Incomplete trip generated. Please try again.");
-    return;
+    return null;
   }
+
+  // Normalize the keys so the view-trip page always gets consistent data
+  const normalizedData = {
+    ...tripData,
+    itinerary: itinerary,
+    hotelOptions: hotels,
+  };
 
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const docId = Date.now().toString();
@@ -168,16 +186,18 @@ function CreateTrip() {
   try {
     await setDoc(doc(db, "AITrips", docId), {
       userSelection: formData,
-      tripData: parsed.data,
+      tripData: normalizedData,
       rawAiText: null,
       userEmail: user?.email ?? null,
       id: docId,
       createdAt: new Date().toISOString(),
     });
     console.log("Trip saved:", docId);
-    navigate('/view-trip/' + docId);
+    return docId;
   } catch (err) {
     console.error("Firestore save failed:", err);
+    toast.error("Failed to save trip. Please try again.");
+    return null;
   }
 };
 
@@ -206,17 +226,80 @@ function CreateTrip() {
 
       <div className="mt-20 flex flex-col gap-10">
         <div>
-          <h2 className="text-xl my-3 font-medium">What is destination of choice?</h2>
-          <GooglePlacesAutocomplete
-            apiKey={import.meta.env.VITE_GOOGLE_PLACE_API_KEY}
-            selectProps={{
-              value: place,
-              onChange: (v) => {
-                setPlace(v);
-                handleInputChange("location", v);
-              },
-            }}
-          />
+          <div className="flex justify-between items-center my-3">
+            <h2 className="text-xl font-medium">What is destination of choice?</h2>
+            <button
+              type="button"
+              onClick={() => {
+                setManualMode((prev) => !prev);
+              }}
+              className="text-xs text-blue-600 hover:text-blue-800 underline font-medium cursor-pointer"
+            >
+              {manualMode ? "🔍 Use Google Places Search" : "✏️ Enter Destination Manually"}
+            </button>
+          </div>
+
+          {manualMode ? (
+            <div className="flex flex-col gap-3">
+              <Input
+                placeholder="e.g. Paris, France or Tokyo, Japan"
+                value={manualLocation}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setManualLocation(val);
+                  const locObj = val.trim() ? { label: val.trim(), value: { description: val.trim() } } : null;
+                  setPlace(locObj);
+                  handleInputChange("location", locObj);
+                }}
+              />
+              <div className="flex flex-wrap gap-2 items-center">
+                <span className="text-xs text-gray-500">Popular:</span>
+                {[
+                  "Paris, France",
+                  "Tokyo, Japan",
+                  "New York, USA",
+                  "Rome, Italy",
+                  "Bali, Indonesia",
+                  "Dubai, UAE",
+                  "London, UK",
+                ].map((city) => (
+                  <button
+                    key={city}
+                    type="button"
+                    onClick={() => {
+                      setManualLocation(city);
+                      const locObj = { label: city, value: { description: city } };
+                      setPlace(locObj);
+                      handleInputChange("location", locObj);
+                    }}
+                    className={`text-xs px-2.5 py-1 rounded-full border transition-all cursor-pointer ${
+                      manualLocation === city
+                        ? "bg-black text-white border-black"
+                        : "bg-gray-50 text-gray-700 hover:bg-gray-100 border-gray-300"
+                    }`}
+                  >
+                    {city}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div>
+              <GooglePlacesAutocomplete
+                apiKey={import.meta.env.VITE_GOOGLE_PLACE_API_KEY}
+                selectProps={{
+                  value: place,
+                  onChange: (v) => {
+                    setPlace(v);
+                    handleInputChange("location", v);
+                  },
+                }}
+              />
+              <p className="text-xs text-gray-400 mt-2">
+                Tip: If autocomplete shows "No options", click <button type="button" onClick={() => setManualMode(true)} className="text-blue-600 underline font-medium cursor-pointer">Enter Destination Manually</button> above.
+              </p>
+            </div>
+          )}
         </div>
 
         <div>

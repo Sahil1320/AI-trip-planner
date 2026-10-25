@@ -32,9 +32,12 @@ function HotelCardItem({ hotel }) {
       rel="noopener noreferrer"
       className="hover:scale-110 transition-all cursor-pointer block"
     >
-      
+
       <img
         src={photoUrl || '/placeholder.jpg'}
+        onError={(e) => {
+          e.currentTarget.src = '/placeholder.jpg';
+        }}
         alt="hotel"
         className="rounded-xl w-full h-[180px] object-cover"
       />

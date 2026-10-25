@@ -31,7 +31,10 @@ function InfoSection({ trip }) {
   return (
     <div className='p-10 md:px-20 lg:px-44 xl:px-56'>
       <img
-        src={photoUrl || "/placeholder.png"} // fallback image
+        src={photoUrl || "/placeholder.jpg"}
+        onError={(e) => {
+          e.currentTarget.src = "/placeholder.jpg";
+        }}
         className='h-[340px] w-full object-cover rounded-xl'
         alt='Trip Location'
       />
